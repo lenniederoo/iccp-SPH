@@ -10,7 +10,7 @@ gamma=7.
 c=1.
 rho0=1.
 deltat=0.02
-n=10
+n=8
 V=1.
 boundaries=np.array([50,50,20]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 density=np.ones((n),dtype=float)
@@ -86,10 +86,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
+f = open('myfile','w')
 
 for i in xrange(0,timesteps):
   velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
-  ax.scatter(position[:,0],position[:,1],position[:,2],c='b', marker='o')
-  plt.show()
-
-  
+#  color=['b','g','r','c','m','y','k','w']
+#  ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
+#  plt.show()
+  f.write('#comment \n')
+  f.write(str(i))
+  f.write('\n ')
+  f.write(str(position[:,:]))
+  f.write('\n') 
+f.close() 

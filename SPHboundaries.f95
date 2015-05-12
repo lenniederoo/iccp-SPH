@@ -8,8 +8,8 @@ real(8), intent(inout) :: velocity(n,3)
 !f2py intent(in, out) R, Velocity
 integer :: i, j
 
-do i = 0, n
-    do j = 0, 3
+do i = 1, n
+    do j = 1, 3
 	if (abs(R(i,j)) > boundaries(j)) then
 	 	if (R(i,j) < 0) then
 			R(i,j)=-boundaries(j)-(R(i,j)+boundaries(j))
