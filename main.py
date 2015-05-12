@@ -1,16 +1,17 @@
 import numpy as np
 import math
-import matplotlib.pyplot as plt 
 import SPHacceleration
 import SPHdensity
+import SPHboundaries
 #print 'hello world'
-timesteps=2
+timesteps=100
 gamma=7.
 c=1.
 rho0=1.
 deltat=0.02
-n=2
+n=10
 V=1.
+boundaries=np.array([50,50,20]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 density=np.ones((n),dtype=float)
 velocity=np.zeros((n,3),dtype=float)
 position=np.random.random((n,3))
@@ -21,9 +22,10 @@ Mass=np.ones((n),dtype=float)
 Ch=1./(4*math.pi*h**3)
 
 
-def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c):
+def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries):
     velocity += .5*(deltat)*ac
     position += .5*(deltat)*velocity
+    position,velocity=SPHboundaries.calcboundaries(position,velocity,boundaries,n)
 #    print velocity, position
     density = calc_density(position,h,n,Mass,Ch,density)
     pressure = calc_pressure(density, rho0, gamma, c)
@@ -60,7 +62,7 @@ def calc_pressure(density,rho0,gamma,c):
 
 def calc_acceleration(Pressure,density,position,h,n,Ch,ac):
   ac=SPHacceleration.calcacceleration(position,ac,Pressure,density,Ch,h,n)
-  ac[:,2]-=1
+  ac[:,2]-=9.8
   return ac
   
 #  for i in len(position):
@@ -71,5 +73,5 @@ def calc_acceleration(Pressure,density,position,h,n,Ch,ac):
 
 
 for i in xrange(0,timesteps):
-  velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c)      
+  velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
     
