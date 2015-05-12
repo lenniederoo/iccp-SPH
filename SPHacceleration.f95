@@ -25,7 +25,7 @@ do i = 1, n
 		piij=0
 	end if
         pos = sum(dr**2)**0.5
-	if (pos==0) then
+	if (pos < 0.00001) then
 		direction(:)=0
 	else
 		direction=dr/pos
