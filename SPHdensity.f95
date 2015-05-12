@@ -11,8 +11,8 @@ real(8), intent(inout) :: Density(n)
 real(8) :: dr(3), pos, q, W
 integer :: i, j
 
-do i = 0, n
-    do j = 0, n
+do i = 1, n
+    do j = 1, n
         dr = R(i,:) - R(j,:)
         pos = sum(dr**2)**0.5
 	q=pos/h

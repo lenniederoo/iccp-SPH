@@ -3,6 +3,7 @@ import math
 import SPHacceleration
 import SPHdensity
 import SPHboundaries
+from animation import AnimatedScatter 
 #print 'hello world'
 timesteps=100
 gamma=7.
@@ -29,9 +30,14 @@ def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boun
 #    print velocity, position
     density = calc_density(position,h,n,Mass,Ch,density)
     pressure = calc_pressure(density, rho0, gamma, c)
-    ac = calc_acceleration(pressure, density, position, h, n, Ch,ac)
+    ac = calc_acceleration(pressure, velocity, density, position, h, n, Ch,ac,c)
 #    print velocity, position, density, ac
     return velocity, position, ac
+    
+def update_func(position,velocity,density,ac, h, Mass, Ch, n, gamma, c, boundaries):
+    velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
+    return position, velocity
+  
 
 #def calc_Kerns(position,h):
 #  r=(position[0]**2+position[1]**2+position[2]**2)**0.5
@@ -60,8 +66,8 @@ def calc_pressure(density,rho0,gamma,c):
   Pressure=((rho0*c**2)/gamma)*(((density/rho0)**gamma)-1)
   return Pressure
 
-def calc_acceleration(Pressure,density,position,h,n,Ch,ac):
-  ac=SPHacceleration.calcacceleration(position,ac,Pressure,density,Ch,h,n)
+def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
+  ac=SPHacceleration.calcacceleration(position, velocity, ac,Pressure,density,Ch,h,c, n)
   ac[:,2]-=9.8
   return ac
   
@@ -72,6 +78,18 @@ def calc_acceleration(Pressure,density,position,h,n,Ch,ac):
 #  
 
 
+#a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,update_func)
+#a.show()
+
+# plotting attempt
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
 for i in xrange(0,timesteps):
   velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
-    
+  ax.scatter(position[:,0],position[:,1],position[:,2],c='b', marker='o')
+  plt.show()
+
+  
