@@ -2,8 +2,8 @@ program main
 	use md_plot
 	implicit none
 	integer :: timesteps = 10000,  i, j, k, l
-	integer, parameter :: n = 1000
-	real(8) :: gama = 7, rho0 = 0.2, deltat = 0.0005, c = 12, h = 2, xs, G = 0.2, alpha = 2, gravity = 1000, epsilon = 0.01
+	integer, parameter :: n = 600
+	real(8) :: gama = 7, rho0 = 0.3, deltat = 0.0005, c = 12, h = 2, xs, G = 0.2, alpha = 1, gravity = 1000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(n) :: density, Pressure
 	real(8), dimension(n,3) :: velocity, positions, ac
@@ -11,7 +11,7 @@ program main
 	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij
 
 	call init_random_seed
-	boundaries=(/15, 15, 20/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/10, 10, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
 	positions = 0d0
@@ -22,8 +22,9 @@ program main
 	do i = 1,n
 		do j = 1,3
 			CALL RANDOM_NUMBER(xs)						
-			positions(i,j) = xs*19 - 10
-			positions(i,3) = 20
+			positions(i,j) = xs*boundaries(1) - boundaries(1)/2
+			CALL RANDOM_NUMBER(xs)
+			positions(i,3) = boundaries(3) - xs*4
 			CALL RANDOM_NUMBER(xs)	
 			velocity(i,j) = xs* 250 - 125
 		end do
@@ -61,7 +62,7 @@ contains
 	
 	subroutine calc_velo_pos
 		if (k < (n + 1) ) then
-			do i = 1,k
+			do i = 1,n
 				do j = 1,3
 					velocity(i,j) = (1-G) * velocity(i,j) + .5*(deltat)*ac(i,j)
 					positions(i,j) = positions(i,j) + .5*(deltat)*velocity(i,j)
