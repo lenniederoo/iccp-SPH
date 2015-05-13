@@ -4,8 +4,11 @@ import SPHacceleration
 import SPHdensity
 import SPHboundaries
 from animatedscatter import AnimatedScatter
+import matplotlib.animation as animation
+from mayavi import mlab
+
 #print 'hello world'
-timesteps=1000
+timesteps=50
 gamma=7.
 c=10.
 rho0=1
@@ -18,13 +21,13 @@ velocity=np.random.random((n,3))*1000-500
 position=np.random.random((n,3))*boundaries[0]*2-boundaries[0]
 #print position
 ac=np.zeros((n,3),dtype=float)
-h=100.
+h=10.
 Mass=np.ones((n),dtype=float)
 Ch=1./(4*math.pi*h**3)
 
 
 def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat):
-    velocity += .5*(deltat)*ac
+    velocity = velocity*0.9 + .5*(deltat)*ac
     position += .5*(deltat)*velocity
     position,velocity=SPHboundaries.calcboundaries(position,velocity,boundaries,n)
 #    print velocity, position
@@ -77,12 +80,14 @@ def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
 #  for i in len(position):
 #    for j in len(position):
 #      ac[i]+=(Pressure[i]/density[i]**2+Pressure[j]/density[j]**2)*calc_Kerns(position[j,:],h)[1]+[gravitionalterm]
-#      
-#  
-
-
-a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat,update_func)
+#Writer = animation.writers['ffmpeg']
+#writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)      
+#ims=[]
+#a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat,update_func)
 #a.show()
+#im_ani = animation.ArtistAnimation(a, ims, interval=50, repeat_delay=3000,blit=True)
+#im_ani.save('im.mp4', writer=writer)
+#a.save('the_movie.mp4', writer = 'mencoder', fps=15)
 
 ## plotting attempt
 #import matplotlib.pyplot as plt
@@ -91,14 +96,20 @@ a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, bo
 ##ax = fig.add_subplot(111, projection='3d')
 #f = open('myfile','w')
 #
-#for i in xrange(0,timesteps):
-#  velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
-#  #color=['b','g','r','c','m','y','k','w']
-#  #ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
-#  #plt.show()
+for i in xrange(0,timesteps):
+  velocity,position,ac,density=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat)
+  mlab.points3d(position[:,0],position[:,1],position[:,2])
+  mlab.savefig('figs/(%d).jpg' %i, size=None, figure=None, magnification='auto')
+  mlab.clf()      
+  #color=['b','g','r','c','m','y','k','w']
+  #ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
+  #plt.show()
 #  f.write('#comment \n')
 #  f.write(str(i))
 #  f.write('\n ')
 #  f.write(str(position[:,:]))
 #  f.write('\n') 
 #f.close() 
+
+
+#mlab.show()
