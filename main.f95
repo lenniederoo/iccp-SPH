@@ -1,17 +1,18 @@
 program main
 	use md_plot
 	implicit none
-	integer :: timesteps = 10000,  i, j, k, l
-	integer, parameter :: n = 600
+	integer :: timesteps = 500,  i, j, k, l
+	integer, parameter :: n = 200
 	real(8) :: gama = 7, rho0 = 0.3, deltat = 0.0008, c = 12, h = 2, xs, G = 0.2, alpha = 1, gravity = 2000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(n) :: density, Pressure
 	real(8), dimension(n,3) :: velocity, positions, ac
 	real(8), parameter :: pi = 4._8*datan(1._8)
-	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij
+	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 0.5
+	character(len=9) :: fmt, x1, filename ! format descriptor
 
 	call init_random_seed
-	boundaries=(/10, 10, 60/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/10, 10, 10/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
 	positions = 0d0
@@ -32,8 +33,9 @@ program main
 	ac=0d0
 	energyvariation = 0d0
 	Ch=1./(4*pi*h**3)
+	fmt = '(I5.5)' ! an integer of width 5 with zeros at the left
 
-	call plot_init(-boundaries(1), boundaries(1) , -boundaries(2), boundaries(2) , -boundaries(3), boundaries(3))
+	!call plot_init(-boundaries(1), boundaries(1) , -boundaries(2), boundaries(2) , -boundaries(3), boundaries(3))
 
 	do k= 1,timesteps
 		if (k < n) then
@@ -52,11 +54,14 @@ program main
 		end if
 		energyvariation = 0d0
   		call calc_velo_pos
-		call plot_points(positions)
+	!	call plot_points(positions)
 		!print *, energyvariation
+		!if (mod(k,5) == 0) then
+			call writepostofile
+		!end if
 	end do   
 
-	call plot_end
+	!call plot_end
 
 contains
 	
@@ -99,7 +104,7 @@ contains
 			else
 				W=0
         		end if
-			Density(i)=Density(i)+W*1 !Mass(j)
+			Density(i)=Density(i)+W* Mass
 			!print *, Density(i)
 		    end do
 			Pressure(i)=((rho0*c**2)/gama)*(((density(i)/rho0)**gama)-1)
@@ -222,6 +227,17 @@ contains
 
 	subroutine calc_kinenergy
 		
+	end subroutine
+
+	subroutine writepostofile
+		write (x1,fmt) K ! converting integer to string using a 'internal file'
+		filename=trim(x1)//'.dat'
+		open (unit=1,file= filename,action="write")
+		write (1,*) boundaries(1), " , "
+		do i=1,n-1
+			write(1,"(F8.4,A,F8.4,A,F8.4,A)") positions(i,1), " , ",  positions(i,2), " , ",  positions(i,3) , " , "
+		end do
+			write(1,"(F8.4,A,F8.4,A,F8.4,A)") positions(i,1), " , ",  positions(i,2), " , ",  positions(i,3)
 	end subroutine
 end program   
     

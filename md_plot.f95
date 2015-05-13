@@ -20,7 +20,7 @@ contains
 		call plvpor(0d0, 1d0, 0d0, 1d0)
 		call plwind(-1d0, 1d0, -2d0 / 3, 4d0 / 3)
 		call plw3d(1d0, 1d0, 1d0, xmin, xmax, ymin, ymax, &
-		zmin, zmax, 45d0, -45d0)
+		zmin, zmax, 0d0, -45d0)
 		
 	end subroutine plot_init
 
