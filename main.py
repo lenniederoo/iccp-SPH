@@ -3,40 +3,41 @@ import math
 import SPHacceleration
 import SPHdensity
 import SPHboundaries
-from animation import AnimatedScatter 
+from animatedscatter import AnimatedScatter
 #print 'hello world'
-timesteps=100
+timesteps=1000
 gamma=7.
-c=1.
-rho0=1.
-deltat=0.02
-n=8
+c=10.
+rho0=1
+deltat=0.005
+n=500
 V=1.
-boundaries=np.array([50,50,20]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+boundaries=np.array([5,5,20]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 density=np.ones((n),dtype=float)
-velocity=np.zeros((n,3),dtype=float)
-position=np.random.random((n,3))
+velocity=np.random.random((n,3))*1000-500
+position=np.random.random((n,3))*boundaries[0]*2-boundaries[0]
 #print position
 ac=np.zeros((n,3),dtype=float)
-h=1.
+h=100.
 Mass=np.ones((n),dtype=float)
 Ch=1./(4*math.pi*h**3)
 
 
-def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries):
+def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat):
     velocity += .5*(deltat)*ac
     position += .5*(deltat)*velocity
     position,velocity=SPHboundaries.calcboundaries(position,velocity,boundaries,n)
 #    print velocity, position
     density = calc_density(position,h,n,Mass,Ch,density)
+    #print density
     pressure = calc_pressure(density, rho0, gamma, c)
     ac = calc_acceleration(pressure, velocity, density, position, h, n, Ch,ac,c)
 #    print velocity, position, density, ac
-    return velocity, position, ac
+    return velocity, position, ac,density
     
-def update_func(position,velocity,density,ac, h, Mass, Ch, n, gamma, c, boundaries):
-    velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
-    return position, velocity
+def update_func(position,velocity,ac,density, h, Mass, Ch, n, gamma, c, boundaries,deltat):
+    velocity,position,ac,density=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat)      
+    return position, velocity,ac,density
   
 
 #def calc_Kerns(position,h):
@@ -55,7 +56,8 @@ def update_func(position,velocity,density,ac, h, Mass, Ch, n, gamma, c, boundari
 #  return [W,dW]
   
 
-def calc_density(position,h,n,Mass,Ch,density):  
+def calc_density(position,h,n,Mass,Ch,density):
+  density=np.zeros((n),dtype=float)
   density=SPHdensity.calcdensity(position,density,Mass,Ch,h,n)
   return density
 #  for i in len(position):
@@ -67,8 +69,9 @@ def calc_pressure(density,rho0,gamma,c):
   return Pressure
 
 def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
+  ac=np.zeros((n,3),dtype=float)
   ac=SPHacceleration.calcacceleration(position, velocity, ac,Pressure,density,Ch,h,c, n)
-  ac[:,2]-=9.8
+  #ac[:,2]-=9.8
   return ac
   
 #  for i in len(position):
@@ -78,24 +81,24 @@ def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
 #  
 
 
-#a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,update_func)
+a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat,update_func)
 #a.show()
 
-# plotting attempt
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-f = open('myfile','w')
-
-for i in xrange(0,timesteps):
-  velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
-#  color=['b','g','r','c','m','y','k','w']
-#  ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
-#  plt.show()
-  f.write('#comment \n')
-  f.write(str(i))
-  f.write('\n ')
-  f.write(str(position[:,:]))
-  f.write('\n') 
-f.close() 
+## plotting attempt
+#import matplotlib.pyplot as plt
+#from mpl_toolkits.mplot3d import Axes3D
+##fig = plt.figure()
+##ax = fig.add_subplot(111, projection='3d')
+#f = open('myfile','w')
+#
+#for i in xrange(0,timesteps):
+#  velocity,position,ac=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries)      
+#  #color=['b','g','r','c','m','y','k','w']
+#  #ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
+#  #plt.show()
+#  f.write('#comment \n')
+#  f.write(str(i))
+#  f.write('\n ')
+#  f.write(str(position[:,:]))
+#  f.write('\n') 
+#f.close() 
