@@ -8,26 +8,29 @@ import matplotlib.animation as animation
 from mayavi import mlab
 
 #print 'hello world'
-timesteps=50
+timesteps=10000
 gamma=7.
 c=10.
-rho0=1
-deltat=0.005
-n=500
+rho0=0.05
+deltat=0.001
+n=1000
 V=1.
-boundaries=np.array([5,5,20]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+position=np.zeros((n,3))
+boundaries=np.array([10,10,60]) #Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 density=np.ones((n),dtype=float)
-velocity=np.random.random((n,3))*1000-500
-position=np.random.random((n,3))*boundaries[0]*2-boundaries[0]
+velocity=np.random.random((n,3))*250-125
+position[:,0]=np.random.random((n))*2-1
+position[:,1]=np.random.random((n))*2-1
+position[:,2]=10-4*np.random.random(n)
 #print position
 ac=np.zeros((n,3),dtype=float)
 h=10.
-Mass=np.ones((n),dtype=float)
+Mass=np.ones((n),dtype=float)*0.7
 Ch=1./(4*math.pi*h**3)
 
 
 def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat):
-    velocity = velocity*0.9 + .5*(deltat)*ac
+    velocity = velocity*0.8 + .5*(deltat)*ac
     position += .5*(deltat)*velocity
     position,velocity=SPHboundaries.calcboundaries(position,velocity,boundaries,n)
 #    print velocity, position
@@ -35,6 +38,7 @@ def calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boun
     #print density
     pressure = calc_pressure(density, rho0, gamma, c)
     ac = calc_acceleration(pressure, velocity, density, position, h, n, Ch,ac,c)
+    position,velocity=SPHboundaries.calcboundaries(position,velocity,boundaries,n)
 #    print velocity, position, density, ac
     return velocity, position, ac,density
     
@@ -83,7 +87,7 @@ def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
 #Writer = animation.writers['ffmpeg']
 #writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)      
 #ims=[]
-#a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat,update_func)
+a = AnimatedScatter(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat,update_func)
 #a.show()
 #im_ani = animation.ArtistAnimation(a, ims, interval=50, repeat_delay=3000,blit=True)
 #im_ani.save('im.mp4', writer=writer)
@@ -96,11 +100,12 @@ def calc_acceleration(Pressure,velocity, density,position,h,n,Ch,ac,c):
 ##ax = fig.add_subplot(111, projection='3d')
 #f = open('myfile','w')
 #
-for i in xrange(0,timesteps):
-  velocity,position,ac,density=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat)
-  mlab.points3d(position[:,0],position[:,1],position[:,2])
-  mlab.savefig('figs/(%d).jpg' %i, size=None, figure=None, magnification='auto')
-  mlab.clf()      
+#for i in xrange(0,timesteps):
+#  velocity,position,ac,density=calc_velo_pos(density,ac, velocity, position, h, Mass, Ch, n, gamma, c, boundaries,deltat)
+#  mlab.points3d(position[:,0],position[:,1],position[:,2])
+#  mlab.savefig('figs/(%d).jpg' %i, size=None, figure=None, magnification='auto')
+#  
+#  mlab.clf()      
   #color=['b','g','r','c','m','y','k','w']
   #ax.scatter(position[:,0],position[:,1],position[:,2],c=color, marker='o')
   #plt.show()
