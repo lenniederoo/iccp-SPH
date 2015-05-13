@@ -3,7 +3,7 @@ program main
 	implicit none
 	integer :: timesteps = 10000,  i, j, k, l
 	integer, parameter :: n = 600
-	real(8) :: gama = 7, rho0 = 0.3, deltat = 0.0005, c = 12, h = 2, xs, G = 0.2, alpha = 1, gravity = 1000, epsilon = 0.01
+	real(8) :: gama = 7, rho0 = 0.3, deltat = 0.0008, c = 12, h = 2, xs, G = 0.2, alpha = 1, gravity = 2000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(n) :: density, Pressure
 	real(8), dimension(n,3) :: velocity, positions, ac
@@ -11,7 +11,7 @@ program main
 	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij
 
 	call init_random_seed
-	boundaries=(/10, 10, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/10, 10, 60/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
 	positions = 0d0
