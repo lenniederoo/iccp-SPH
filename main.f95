@@ -1,93 +1,90 @@
 program main
 	use md_plot
 	implicit none
-	integer :: timesteps = 500,  i, j, k, l
-	integer, parameter :: n = 200
-	real(8) :: gama = 7, rho0 = 0.3, deltat = 0.0008, c = 12, h = 2, xs, G = 0.2, alpha = 1, gravity = 2000, epsilon = 0.01
+	integer :: timesteps = 2500,  i, j, k, l, n
+	integer, parameter :: totaln = 1000
+	real(8) :: gama = 7, rho0 = 0.004, deltat = 0.0004, c = 2, h = 4, xs, G = 0.023, alpha = 1, gravity = 1000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
-	real(8), dimension(n) :: density, Pressure
-	real(8), dimension(n,3) :: velocity, positions, ac
+	real(8), dimension(totaln) :: density, Pressure
+	real(8), dimension(totaln,3) :: velocity, positions, ac
 	real(8), parameter :: pi = 4._8*datan(1._8)
-	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 0.5
+	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 2, heatcoeff = 0.1
 	character(len=9) :: fmt, x1, filename ! format descriptor
 
 	call init_random_seed
-	boundaries=(/10, 10, 10/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/8, 8, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
-	positions = 0d0
+	positions = boundaries(3)*100
+	n = 0
 	!positions(1,3) = -20
 	!positions(2,1) = 2
 	!positions(2,2) = 2
 	!positions(2,3) = -20
-	do i = 1,n
-		do j = 1,3
-			CALL RANDOM_NUMBER(xs)						
-			positions(i,j) = xs*boundaries(1) - boundaries(1)/2
-			CALL RANDOM_NUMBER(xs)
-			positions(i,3) = boundaries(3) - xs*4
-			CALL RANDOM_NUMBER(xs)	
-			velocity(i,j) = xs* 250 - 125
-		end do
-	end do
+	!do i = 1,n
+	!	do j = 1,3
+	!		CALL RANDOM_NUMBER(xs)						
+	!		positions(i,j) = xs*boundaries(1) - boundaries(1)/2
+	!		CALL RANDOM_NUMBER(xs)
+	!		positions(i,3) = xs*4
+	!		CALL RANDOM_NUMBER(xs)
+	!		velocity(i,j) = xs* 25
+        !               velocity(i,3) = 2000
+	!	end do
+	!end do
 	ac=0d0
 	energyvariation = 0d0
 	Ch=1./(4*pi*h**3)
 	fmt = '(I5.5)' ! an integer of width 5 with zeros at the left
 
-	!call plot_init(-boundaries(1), boundaries(1) , -boundaries(2), boundaries(2) , -boundaries(3), boundaries(3))
+        call plot_init(-boundaries(1), boundaries(1) , -boundaries(2), boundaries(2) , -boundaries(3), boundaries(3))
 
 	do k= 1,timesteps
-		if (k < n) then
-			!CALL RANDOM_NUMBER(xs)						
-			!positions(k,1) = xs*9 - 5
-			!CALL RANDOM_NUMBER(xs)
-			!positions(k,2) = xs*9 - 5
-			!CALL RANDOM_NUMBER(xs)
-			!positions(k,3) = boundaries(3)
-			!CALL RANDOM_NUMBER(xs)	
-			!velocity(k,1) = xs* 250 - 125
-			!CALL RANDOM_NUMBER(xs)	
-			!velocity(k,2) = xs* 250 - 125
-			!CALL RANDOM_NUMBER(xs)	
-			!velocity(k,3) = xs* 250 - 125
+		if (k < totaln) then
+			n = n + 1
+			CALL RANDOM_NUMBER(xs)						
+			positions(k,1) = 10*cos(xs)
+			CALL RANDOM_NUMBER(xs)
+			positions(k,2) = 10 * sin(xs)
+			CALL RANDOM_NUMBER(xs)
+			positions(k,3) = 0.9*boundaries(3)
+			CALL RANDOM_NUMBER(xs)	
+			velocity(k,1) = -10 !- 1250
+			CALL RANDOM_NUMBER(xs)	
+			velocity(k,2) = -10 !xs* 2500 - 1250
+			CALL RANDOM_NUMBER(xs)	
+			velocity(k,3) =  100
 		end if
 		energyvariation = 0d0
   		call calc_velo_pos
-	!	call plot_points(positions)
+		!if (mod(k,20) == 0) then
+			call plot_points(positions)
+		!end if		
 		!print *, energyvariation
 		!if (mod(k,5) == 0) then
-			call writepostofile
+			!call writepostofile
 		!end if
 	end do   
 
-	!call plot_end
+	call plot_end
 
 contains
 	
 	subroutine calc_velo_pos
-		if (k < (n + 1) ) then
-			do i = 1,n
-				do j = 1,3
-					velocity(i,j) = (1-G) * velocity(i,j) + .5*(deltat)*ac(i,j)
-					positions(i,j) = positions(i,j) + .5*(deltat)*velocity(i,j)
-				end do
+		do i = 1,n
+			do j = 1,3
+				velocity(i,j) = (1-G)*velocity(i,j)  + .5*(deltat)*ac(i,j)
+				positions(i,j) = positions(i,j) + .5*(deltat)*velocity(i,j)
 			end do
-		else
-			do i = 1,n
-				do j = 1,3
-					velocity(i,j) = (1-G) * velocity(i,j) + .5*(deltat)*ac(i,j)
-					positions(i,j) = positions(i,j) + .5*(deltat)*velocity(i,j)
-				end do
-			end do
-		end if 
+		end do
 		
 		call calc_kinenergy
 		call calcboundaries
 		call calc_density_pressure
 		call calc_pressure
+		!call calcboundaries
 		call calc_acceleration
-		call calcboundaries
+		!call calcboundaries
 	end subroutine
 
 	subroutine calc_density_pressure 
@@ -150,6 +147,7 @@ contains
 				dW=0
 		        end if
 			Ac(i,:)=Ac(i,:) - direction(:)*(Pressure(i)/Density(i)**2 + Pressure(j)/Density(j)**2 + piij)*dW                     !((Pressure(i)/Density(i)**2+Pressure(j)/Density(j)**2 + piij)*dW)
+			!Ac(j,:) = -Ac(i,:)				
 			if (i == 10) then
 				!print *, Ac(i,1), Ac(i,2), Ac(i,3), Pressure(i), Density(i), Pressure(j), Density(j), piij, dW
 			end if
@@ -160,6 +158,8 @@ contains
 					Ac(i,l) = Ac(i,l) - gravity
 				end if
 			end do
+			
+			!print *, sqrt(Ac(i,1)**2 + Ac(i,2)**2 + Ac(i,3)**2)
 		    end do
 		end do		
 	end subroutine
@@ -170,6 +170,9 @@ contains
 			if (abs(positions(i,j)) > boundaries(j)) then
 			 	if (positions(i,j) < 0) then
 					positions(i,j)=-boundaries(j)-(positions(i,j)+boundaries(j))
+					if (j == 3) then
+						velocity(i,j) = (1-heatcoeff)* velocity(i,j)
+					end if
 				else
 					positions(i,j)=boundaries(j)-(positions(i,j)-boundaries(j))
 				end if

@@ -6,7 +6,7 @@ camera {
 perspective
 location <80,40,50>//<45,30,40>
 look_at <0,0,0>
-angle 30
+angle 50
 }
 #fopen file "./Data/00001.dat" read
 #read (file,Var1)
@@ -41,8 +41,8 @@ cylinder{<-REGION,REGION,-REGION>, <-REGION,REGION,REGION>,GROSOR pigment {rgb<1
 
 
 sphere {<Var1,Var3,Var2>,0.5
-pigment {rgb</*Var8*/0,/*Var9*/0,/*Var10*/1>}
-finish {phong .2 reflection {.03}}
+pigment {rgb</*Var8*/0.25,/*Var9*/0.729,/*Var10*/1>}
+finish {phong .2 reflection {.0}}
 }
 
 

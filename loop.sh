@@ -2,7 +2,7 @@
  
 echo "Simulating the fluid"
 
-./main
+#./main
 
 echo "Moving all .dat files to Data folder"
 mv ./*.dat ./Data
@@ -11,7 +11,7 @@ echo "Rendering all images, please wait"
 
 n=0
 
-while [ $n -le 100 ]
+while [ $n -le 498 ]
 do
 	((n++))
 	#rm ./00001.dat
