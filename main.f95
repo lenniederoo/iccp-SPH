@@ -2,17 +2,17 @@ program main
 	use md_plot
 	implicit none
 	integer :: timesteps = 2500,  i, j, k, l, n
-	integer, parameter :: totaln = 1000
+	integer, parameter :: totaln = 1500
 	real(8) :: gama = 7, rho0 = 0.008, deltat = 0.0004, c = 2, h = 2.5, xs, G = 0.023, alpha = 1, gravity = 1000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(totaln) :: density, Pressure
 	real(8), dimension(totaln,3) :: velocity, positions, ac
 	real(8), parameter :: pi = 4._8*datan(1._8)
-	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 1.5, heatcoeff = 0.1
+	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 2, heatcoeff = 0.1
 	character(len=9) :: fmt, x1, filename ! format descriptor
 
 	call init_random_seed
-	boundaries=(/8, 8, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/20, 20, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
 	positions = boundaries(3)*100
@@ -62,7 +62,7 @@ program main
 		!end if		
 		!print *, energyvariation
 		!if (mod(k,5) == 0) then
-			!call writepostofile
+			call writepostofile
 		!end if
 	end do   
 
