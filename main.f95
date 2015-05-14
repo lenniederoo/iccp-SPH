@@ -3,12 +3,12 @@ program main
 	implicit none
 	integer :: timesteps = 2500,  i, j, k, l, n
 	integer, parameter :: totaln = 1000
-	real(8) :: gama = 7, rho0 = 0.004, deltat = 0.0004, c = 2, h = 4, xs, G = 0.023, alpha = 1, gravity = 1000, epsilon = 0.01
+	real(8) :: gama = 7, rho0 = 0.008, deltat = 0.0004, c = 2, h = 2.5, xs, G = 0.023, alpha = 1, gravity = 1000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(totaln) :: density, Pressure
 	real(8), dimension(totaln,3) :: velocity, positions, ac
 	real(8), parameter :: pi = 4._8*datan(1._8)
-	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 2, heatcoeff = 0.1
+	real(8) :: pos, q, W, dW, Ch, energyvariation, piij, muij, Mass = 1.5, heatcoeff = 0.1
 	character(len=9) :: fmt, x1, filename ! format descriptor
 
 	call init_random_seed
@@ -49,11 +49,11 @@ program main
 			CALL RANDOM_NUMBER(xs)
 			positions(k,3) = 0.9*boundaries(3)
 			CALL RANDOM_NUMBER(xs)	
-			velocity(k,1) = -10 !- 1250
+			velocity(k,1) = 0!-10 !- 1250
 			CALL RANDOM_NUMBER(xs)	
-			velocity(k,2) = -10 !xs* 2500 - 1250
+			velocity(k,2) = 0!-10 !xs* 2500 - 1250
 			CALL RANDOM_NUMBER(xs)	
-			velocity(k,3) =  100
+			velocity(k,3) = 0! 100
 		end if
 		energyvariation = 0d0
   		call calc_velo_pos

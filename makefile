@@ -2,7 +2,7 @@ FC = gfortran
 FFLAGS =  -march=native -O3 -Wall -Wextra -Wtabs -fcheck=all -mno-avx -ffast-math -fopenmp -I /usr/include
 
 LDFLAGS = -fopenmp
-LIBS = -llapack -lblas -g  -lfftw3
+LIBS = -llapack -lblas -g
 
 FFLAGS += $(shell pkg-config --cflags plplotd-f95)
 LIBS += $(shell pkg-config --libs plplotd-f95)
