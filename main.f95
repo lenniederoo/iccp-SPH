@@ -1,9 +1,9 @@
 program main
 	use md_plot
 	implicit none
-	integer :: timesteps = 2500,  i, j, k, l, n
+	integer :: timesteps = 1200,  i, j, k, l, n
 	integer, parameter :: totaln = 1000
-	real(8) :: gama = 7, rho0 = 0.004, deltat = 0.0004, c = 2, h = 4, xs, G = 0.023, alpha = 1, gravity = 1000, epsilon = 0.01
+	real(8) :: gama = 7, rho0 = 0.04, deltat = 0.001, c = 2, h = 4, xs, G = 0.033, alpha = 1, gravity = 1000, epsilon = 0.01
 	real(8), dimension(3) :: boundaries, dr, direction, dv
 	real(8), dimension(totaln) :: density, Pressure
 	real(8), dimension(totaln,3) :: velocity, positions, ac
@@ -12,7 +12,7 @@ program main
 	character(len=9) :: fmt, x1, filename ! format descriptor
 
 	call init_random_seed
-	boundaries=(/8, 8, 40/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
+	boundaries=(/8, 8, 10/) !Boundaries of box first two numbers are distance from 0 on both sides for X and Y, last number is floor.
 	density=0d0
 	velocity=0d0
 	positions = boundaries(3)*100
@@ -43,9 +43,9 @@ program main
 		if (k < totaln) then
 			n = n + 1
 			CALL RANDOM_NUMBER(xs)						
-			positions(k,1) = 10*cos(xs)
+			positions(k,1) = 15*cos(xs)
 			CALL RANDOM_NUMBER(xs)
-			positions(k,2) = 10 * sin(xs)
+			positions(k,2) = 15 * sin(xs)
 			CALL RANDOM_NUMBER(xs)
 			positions(k,3) = 0.9*boundaries(3)
 			CALL RANDOM_NUMBER(xs)	
@@ -62,7 +62,7 @@ program main
 		!end if		
 		!print *, energyvariation
 		!if (mod(k,5) == 0) then
-			!call writepostofile
+			call writepostofile
 		!end if
 	end do   
 
@@ -77,8 +77,7 @@ contains
 				positions(i,j) = positions(i,j) + .5*(deltat)*velocity(i,j)
 			end do
 		end do
-		
-		call calc_kinenergy
+		!call calc_kinenergy
 		call calcboundaries
 		call calc_density_pressure
 		call calc_pressure
@@ -94,13 +93,14 @@ contains
 		        pos = (positions(i,1) - positions(j,1))**2 + (positions(i,2) - positions(j,2))**2 + (positions(i,3) - positions(j,3))**2
 			pos = pos**0.5
 			q=pos/h
-        		if (q<1) then
-   				W=(Ch*((2.-q)**3-4*(1.-q)**3))
-			else if (q >= 1 .and. q<2) then
-				W=Ch*(2.-q)**3
-			else
-				W=0
-        		end if
+			call calckernel
+        		!if (q<1) then
+   			!	W=(Ch*((2.-q)**3-4*(1.-q)**3))
+			!else if (q >= 1 .and. q<2) then
+			!	W=Ch*(2.-q)**3
+			!else
+			!	W=0
+        		!end if
 			Density(i)=Density(i)+W* Mass
 			!print *, Density(i)
 		    end do
@@ -139,13 +139,14 @@ contains
 			!jpos = jpos**0.5
 			q= pos/h !jpos/h
 			!print *, q
-		        if (q<1) then
-		   		dW=(Ch/h*(-3*(2.-q)**2+12*(1.-q)**2))
-			else if (q >= 1 .and. q<2) then
-				dW=Ch/h*(-3*(2.-q)**2)
-			else
-				dW=0
-		        end if
+		        call calcgradientkernel
+			!if (q<1) then
+		   	!	dW=(Ch/h*(-3*(2.-q)**2+12*(1.-q)**2))
+			!else if (q >= 1 .and. q<2) then
+			!	dW=Ch/h*(-3*(2.-q)**2)
+			!else
+			!	dW=0
+		        !end if
 			Ac(i,:)=Ac(i,:) - direction(:)*(Pressure(i)/Density(i)**2 + Pressure(j)/Density(j)**2 + piij)*dW                     !((Pressure(i)/Density(i)**2+Pressure(j)/Density(j)**2 + piij)*dW)
 			!Ac(j,:) = -Ac(i,:)				
 			if (i == 10) then
@@ -228,9 +229,35 @@ contains
 		call random_seed(put=seed)
 	end subroutine init_random_seed
 
-	subroutine calc_kinenergy
-		
+	subroutine calckernel
+		if (q<1) then
+			!W=(Ch*((2.-q)**3-4*(1.-q)**3))
+			!W = 4**3*Ch*(1 - 1.5*q**2 + 0.75*q**3)
+			!W = 15*4*Ch*(1-q)**2
+			W=Ch*(2.-q)**3
+		else if (q >= 1 .and. q<2) then
+			W=Ch*(2.-q)**3
+			!W = 4**3*Ch*(0.25*(2-q)**3)
+			!W = 0
+		else
+			W=0
+        	end if
 	end subroutine
+
+	subroutine calcgradientkernel
+		if (q<1) then
+	   		!dW=(Ch/h*(-3*(2.-q)**2+12*(1.-q)**2))
+			!dW = 4**3/h*Ch*(2.25*q**2 - 3*q)
+			!dW = 30/h*Ch*4*(1-q)**1
+			dW=Ch/h*(-3*(2.-q)**2)
+		else if (q >= 1 .and. q<2) then
+			dW=Ch/h*(-3*(2.-q)**2)
+			!dW = 4/h*Ch*(-0.75*(2-q)**2)
+			!dW = 0
+		else
+			dW=0
+	        end if
+	end subroutine calcgradientkernel
 
 	subroutine writepostofile
 		write (x1,fmt) K ! converting integer to string using a 'internal file'
